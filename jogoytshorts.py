@@ -15,6 +15,7 @@ if st.button("Iniciar Simulação"):
     gravidade_valor = 0.25 if modo_jogo == "Gravidade" else 0
     rot_base = vel_rot_inicial / 300 
     
+    # IMPORTANTE: Usamos {{ }} para o que é JS/CSS e { } apenas para variáveis Python
     html_code = f"""
     <div style="display: flex; flex-direction: column; align-items: center; background: #111; padding: 20px; border-radius: 20px;">
         <canvas id="canvas" width="500" height="500" style="background:#000; border-radius: 50%; border: 4px solid #444;"></canvas>
@@ -33,7 +34,7 @@ if st.button("Iniciar Simulação"):
         
         const centerX = 250, centerY = 250, radius = 235;
         const bounciness = {elasticidade};
-        const spikeHeight = 55; // Espinhos maiores
+        const spikeHeight = 55;
         
         let speedMultiplier = 1.0;
         let rotationAngle = 0;
@@ -46,8 +47,7 @@ if st.button("Iniciar Simulação"):
         const gravity = {gravidade_valor};
 
         function createBall(x, y) {{
-            // Spawn mais alto (y menor) e impulso inicial aleatório forte
-            const angle = (Math.random() * Math.PI) + 0.5; // Direções voltadas para baixo
+            const angle = (Math.random() * Math.PI) + 0.5;
             const initialPush = 6; 
             return {{
                 x: x, y: y,
@@ -58,7 +58,7 @@ if st.button("Iniciar Simulação"):
             }};
         }}
 
-        let balls = [createBall(250, 80)]; // Começa no topo
+        let balls = [createBall(250, 80)];
         
         function update() {{
             if (gameOver) return;
@@ -79,7 +79,6 @@ if st.button("Iniciar Simulação"):
 
             rotationAngle += currentRotationSpeed;
 
-            // Desenho dos Espinhos (Hitbox maior visualmente também)
             ctx.fillStyle = "#ff0000";
             for (let i = 0; i < 3; i++) {{
                 let angle = rotationAngle + (i * 2 * Math.PI / 3);
@@ -88,8 +87,8 @@ if st.button("Iniciar Simulação"):
                 ctx.rotate(angle);
                 ctx.beginPath();
                 ctx.moveTo(radius, 0);
-                ctx.lineTo(radius - spikeHeight, -35); // Mais largo
-                ctx.lineTo(radius - spikeHeight, 35);  // Mais largo
+                ctx.lineTo(radius - spikeHeight, -35);
+                ctx.lineTo(radius - spikeHeight, 35);
                 ctx.fill();
                 ctx.restore();
             }}
@@ -106,7 +105,6 @@ if st.button("Iniciar Simulação"):
                 let dy = b.y - centerY;
                 let dist = Math.sqrt(dx*dx + dy*dy);
 
-                // Hitbox Angular do Espinho (Aumentada para 0.35 rad)
                 let ballAngle = Math.atan2(dy, dx);
                 if (ballAngle < 0) ballAngle += 2 * Math.PI;
 
@@ -122,25 +120,21 @@ if st.button("Iniciar Simulação"):
                         balls.splice(i, 1);
                         hitSpike = true;
                         break;
-                    }
-                }
+                    }}
+                }}
 
                 if (!hitSpike) {{
-                    // Colisão com a borda - FÍSICA MELHORADA PARA NÃO GRUDAR
                     if (dist + b.r >= radius) {{
                         let nx = dx / dist;
                         let ny = dy / dist;
                         let dot = b.vx * nx + b.vy * ny;
                         
-                        // Reflete e aplica bounciness
                         b.vx = (b.vx - 2 * dot * nx) * bounciness;
                         b.vy = (b.vy - 2 * dot * ny) * bounciness;
                         
-                        // TELEPORTE DE SEGURANÇA (Anti-grude)
                         b.x = centerX + nx * (radius - b.r - 5);
                         b.y = centerY + ny * (radius - b.r - 5);
 
-                        // Spawn de uma nova no topo
                         balls.push(createBall(250, 80));
                     }}
 
@@ -149,7 +143,7 @@ if st.button("Iniciar Simulação"):
                     ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
                     ctx.fill();
                 }}
-            }
+            }}
             
             countEl.innerText = balls.length;
             timerEl.innerText = `Tempo: ${{elapsedSecs}}s | Vel. Espinhos: ${{ (currentRotationSpeed * 300).toFixed(1) }}`;
